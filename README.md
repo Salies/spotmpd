@@ -1,2 +1,2 @@
 # elizabeth
-MPD/Spotify driver and library organizer.
+MPD/Spotify client and library manager.
