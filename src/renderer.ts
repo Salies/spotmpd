@@ -1,3 +1,13 @@
-// This file is required by the index.html file and will
-// be executed in the renderer process for that window.
-// All of the Node.js APIs are available in this process.
+import { ipcRenderer, ipcMain } from 'electron';
+
+let isPlaying: boolean = false, stopped: boolean = true;
+
+ipcRenderer.send('load-list', [
+    "Digital (Bandcamp)/Alestorm/Curse of the Crystal Coconut (Digital Deluxe)/Alestorm - Curse of the Crystal Coconut (Digital Deluxe) - 07 Pirate's Scorn.flac",
+    "Digital (Bandcamp)/Alestorm/Curse of the Crystal Coconut (Digital Deluxe)/Alestorm - Curse of the Crystal Coconut (Digital Deluxe) - 08 Shit Boat (No Fans).flac",
+    "Digital (Bandcamp)/Alestorm/Curse of the Crystal Coconut (Digital Deluxe)/Alestorm - Curse of the Crystal Coconut (Digital Deluxe) - 09 Pirate Metal Drinking Crew.flac",
+]);
+
+function playback(){
+    ipcRenderer.send('playback');
+}
