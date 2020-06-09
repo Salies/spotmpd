@@ -1,0 +1,33 @@
+{
+  "name": "elizabeth",
+  "version": "0.0.1",
+  "description": "MPD/Spotify client and library manager.",
+  "main": "main.js",
+  "scripts": {
+    "test": "node .src/main.js",
+    "start": "electron ./src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Salies/elizabeth.git"
+  },
+  "keywords": [
+    "mpd",
+    "spotify",
+    "music-player",
+    "music",
+    "mpd-client",
+    "spotify-client",
+    "client"
+  ],
+  "author": "Daniel Serezane",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/Salies/elizabeth/issues"
+  },
+  "homepage": "https://github.com/Salies/elizabeth#readme",
+  "devDependencies": {
+    "@salies/mpd.js": "^1.3.0",
+    "electron": "^9.0.3"
+  }
+}
