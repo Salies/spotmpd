@@ -2,13 +2,19 @@
     <div class="player-controls">
         eae, sou o controls
         <button @click="playback()">Play/Pause</button>
+        <ProgressBar></ProgressBar>
         <input type="range" v-model="volume" min="0" max="100" step="1" @input="setvol">
     </div>
 </template>
 
 <script>
+import ProgressBar from './Controls/ProgressBar'
+
 export default{
     name:'controls',
+    components:{
+        ProgressBar
+    },
     data: function() {
         return {
             volume: null
