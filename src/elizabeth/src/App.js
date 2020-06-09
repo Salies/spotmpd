@@ -1,10 +1,29 @@
 import React from 'react';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import Controls from './components/Controls';
+import Home from './components/Home';
+import Albums from './components/Albums';
 
-function App() {
+function App(){
   return (
-    <div className="App">
-      salve
-    </div>
+    <Router>
+      <div className="App">
+        <div className="menubar">
+          <Link to="/">Home</Link> - <Link to="/albums">Albums</Link>
+        </div>
+        <div class="wrapper">
+          <Switch>
+            <Route path="/albums">
+              <Albums/>
+            </Route>
+            <Route path="/">
+              <Home/>
+            </Route>
+          </Switch>
+        </div>
+        <Controls></Controls>
+      </div>
+    </Router>
   );
 }
 
