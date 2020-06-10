@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import Controls from './components/Controls';
 import Home from './components/Home';
 import Albums from './components/Albums';
+import './styles/App.css';
 
 function App(){
   return (
@@ -11,7 +12,7 @@ function App(){
         <div className="menubar">
           <Link to="/">Home</Link> - <Link to="/albums">Albums</Link>
         </div>
-        <div class="wrapper">
+        <div className="wrapper">
           <Switch>
             <Route path="/albums">
               <Albums/>

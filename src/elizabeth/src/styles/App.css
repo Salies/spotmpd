@@ -1,0 +1,66 @@
+:root{
+    --base-00: #222223;
+    --base-01: #555968;
+    --base-03: #2b2c30; 
+    --pink: #ff90d0;
+    --base-3: #e6e6e6;
+}
+
+body{
+    margin:0;
+    background-color:var(--base-00);
+}
+
+.menubar, .controls, .wrapper{
+    width:100%;
+}
+
+.menubar, .controls{
+    background-color: var(--base-03);
+}
+
+.menubar{
+    height: 24px;
+}
+
+.controls{
+    color:var(--base-3);
+    height:90px;
+}
+
+.wrapper{
+    height:calc(100vh - 114px); /* 90px + 24px = 114px */
+}
+
+.unselectable{
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+input[type="range"]{
+    -webkit-appearance: none;
+}
+
+.volume-container{
+    margin-top:20px;
+    float:left;
+    width:140px;
+    height:20px;
+}
+
+.volume{
+    margin-top: 2px;
+    margin-left:6px;
+    width:72px!important;
+}
+
+.volume-container div{
+    float:left;
+}
+
+.progressbar-container{
+    width:75%;
+    padding:0 9px;
+    float:left;
+    margin:0 20px;
+}
