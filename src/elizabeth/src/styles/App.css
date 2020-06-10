@@ -24,8 +24,12 @@ body{
 }
 
 .controls{
+    display:flex;
     color:var(--base-3);
     height:90px;
+    position:relative;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .wrapper{
@@ -42,15 +46,18 @@ input[type="range"]{
 }
 
 .volume-container{
-    margin-top:20px;
-    float:left;
-    width:140px;
+    width:107px;
     height:20px;
+    margin-right:40px;
+    /*position:absolute;
+    right:40px;
+    top:50%;
+    transform:translateY(-50%);*/
 }
 
 .volume{
     margin-top: 2px;
-    margin-left:6px;
+    margin-left:9px;
     width:72px!important;
 }
 
@@ -59,8 +66,47 @@ input[type="range"]{
 }
 
 .progressbar-container{
-    width:75%;
-    padding:0 9px;
-    float:left;
-    margin:0 20px;
+    width:100%;
+    text-align:center;
+    
+}
+
+.progressbar{
+    display: inline-block;
+}
+
+.progressbar-container span{
+    display: block;
+    width:calc(18% - 18px);
+}
+
+.progressbar-container span:first-of-type{
+    text-align:right;
+    float: left;
+}
+
+.progressbar-container span:last-of-type{
+    text-align:left;
+    float: right;
+}
+
+.s{
+    margin-top:1px;
+}
+
+.now-playing{
+    width:90px;
+    height:90px;
+    background-color: #242526;
+}
+
+.middle-controls{
+    width: calc(100% - 317px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.player-buttons{
+    margin:0 auto;
 }

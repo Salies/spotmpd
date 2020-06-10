@@ -5,7 +5,8 @@
 }
 
 .progressbar{
-  width:100%!important;
+  width: 64%!important;
+  padding: 8px 9px!important;
 }
 
 [data-reach-slider-track-highlight] {

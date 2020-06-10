@@ -18,9 +18,9 @@ function ProgressBar({duration}){
 
     return(
         <div className="progressbar-container">
-            { toMSS(current) }
+            <span>{ toMSS(current) }</span>
             <Slider className="progressbar" min={0} max={Number(duration)} value={current} onChange={setCurrentTime} step={1} />
-            { toMSS(duration) }
+            <span>{ toMSS(duration) }</span>
         </div>
     );
 }

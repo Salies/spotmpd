@@ -23,8 +23,8 @@ function Volume({default_value}){
     }
     return(
         <div className="volume-container">
-            <div onClick={()=> setMute(!mute)}>{ v }</div>
-            <Slider disabled={mute} className="volume" defaultValue={Number(default_value)} min={0} max={100} onChange={setVol} />
+            <div className="s" onClick={()=> setMute(!mute)}>{ v }</div>
+            <Slider disabled={mute} className="volume" defaultValue={Number(default_value)} min={0} max={100} step={1} onChange={setVol} />
         </div>
     );
 }
