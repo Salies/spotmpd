@@ -134,15 +134,6 @@ ipcMain.on('setvol', (event, val)=>{
     global.volume = val;
     client.sendCommand(mpd.cmd(`setvol ${val}`, []));
 });
-
-function updateSongInfo(send){ //TODO: probably won't be needed in the future
-    client.sendCommand(mpd.cmd('currentsong', []), function(err, songInfo){
-        let s = formatStatus(songInfo);
-        playerData.currentSong.title = s["Title"];
-        playerData.currentSong.albumArtist = s["AlbumArtist"];
-        if(send) mainWindow.webContents.send('update-player', playerData);
-    });
-}
   
 client.on('ready', function() {
     console.log("ready");
@@ -158,9 +149,16 @@ client.on('ready', function() {
     if(obj["state"] !== "stop"){
         playerData.stopped = false;
         playerData.currentSong.id = obj["songid"];
-        updateSongInfo();
-        let b = obj["state"] == "play";
-        playerData.isPlaying = b;
+        client.sendCommand(mpd.cmd('currentsong', []), function(err, songInfo){
+            let s = formatStatus(songInfo);
+            playerData.currentSong.title = s["Title"];
+            playerData.currentSong.albumArtist = s["AlbumArtist"];
+            let b = obj["state"] == "play";
+            playerData.isPlaying = b;
+            mainWindow.webContents.send('update-player', playerData);
+        });
+        /*let b = obj["state"] == "play";
+        playerData.isPlaying = b;*/
       }
     });
 });
@@ -175,14 +173,20 @@ client.on('system-player', function() {
         if(obj["state"] == "stop"){
             playerData.stopped = true;
             playerData.isPlaying = false;
-            updateSongInfo(true)
+            playerData.currentSong = nullSong;
+            mainWindow.webContents.send('update-player', playerData);
         }
         else if(obj["state"] == "play" && obj["songid"] !== playerData.currentSong.id){
             console.log("mudou a musica!")
     
             playerData.currentSong.id = obj["songid"];
 
-            updateSongInfo(true)
+            client.sendCommand(mpd.cmd('currentsong', []), function(err, songInfo){
+                let s = formatStatus(songInfo);
+                playerData.currentSong.title = s["Title"];
+                playerData.currentSong.albumArtist = s["AlbumArtist"];
+                mainWindow.webContents.send('update-player', playerData);
+            });
         }
     });
 });
