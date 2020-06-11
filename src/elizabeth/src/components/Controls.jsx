@@ -1,18 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ProgressBar from './Controls/ProgressBar';
-import Volume from './Controls/Volume';
 import Buttons from './Controls/Buttons';
 import NowPlaying from './Controls/NowPlaying';
 
-function Controls(){
+const { ipcRenderer } = window.require('electron');
+
+function callIpc(call){
+    ipcRenderer.send(call);
+}
+
+function Controls({initial}){
+    const [playerData, setPlayerData] = useState(initial);
+
+    useEffect(() => {
+        function handleDataChange(event, data) {
+          setPlayerData(data);
+        }
+
+        ipcRenderer.on('update-player', handleDataChange);
+
+        return () => {
+            ipcRenderer.removeListener('update-player', handleDataChange);
+        };
+    });
+
+    console.log(playerData)
+
     return(
-        <div className="controls unselectable">
-            <NowPlaying />
+        <div>
+            <NowPlaying song={playerData.currentSong.title} artist={playerData.currentSong.albumArtist}/>
             <div className="middle-controls">
-                <Buttons />
-                <ProgressBar duration="195" />
+                <Buttons callback={callIpc} playing={playerData.isPlaying}/>
+                <ProgressBar duration="195" disabled={playerData.stopped} />
             </div>
-            <Volume default_value="45" />
         </div>
     );
 }

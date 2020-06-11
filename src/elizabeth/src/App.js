@@ -4,8 +4,38 @@ import Controls from './components/Controls';
 import Home from './components/Home';
 import Albums from './components/Albums';
 import './styles/App.css';
+import Volume from './components/Controls/Volume';
 
-function App(){
+//const { ipcRenderer } = window.require('electron');
+/*webContents.on('update-player', (event) => {
+  const choice = dialog.showMessageBox(win, {
+    type: 'question',
+    buttons: ['Leave', 'Stay'],
+    title: 'Do you want to leave this site?',
+    message: 'Changes you made may not be saved.',
+    defaultId: 0,
+    cancelId: 1
+  })
+  const leave = (choice === 0)
+  if (leave) {
+    event.preventDefault()
+  }
+})
+
+useEffect(() => {
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+    ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+    // Especifique como limpar depois desse efeito:
+    return function cleanup() {
+      ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+    };
+  });
+*/
+
+function App({initialData}){
+  console.log('app renderizando')
   return (
     <Router>
       <div className="App">
@@ -22,7 +52,10 @@ function App(){
             </Route>
           </Switch>
         </div>
-        <Controls></Controls>
+        <div className="controls unselectable">
+          <Controls initial={initialData}/>
+          <Volume />
+        </div>
       </div>
     </Router>
   );

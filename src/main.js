@@ -4,8 +4,9 @@ const { app, BrowserWindow, ipcMain } = require('electron'), mpd = require('@sal
 FUNCTIONSS
 */
 
+let mainWindow
 function createWindow(){
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width:800,
         height:710,
         useContentSize: true,
@@ -34,15 +35,21 @@ function formatStatus(msg){
 GLOBAL (SCOPED TO MAIN) VARIABLES
 */
 
-let isPlaying = false, 
-    stopped = true,
-    currentSong = null,
-    volume = null,
-    config = null;
+const nullSong = {
+    title:null,
+    albumArtist:null,
+    id:null
+};
+
+let config, playerData = {
+        isPlaying: false, 
+        stopped: true,
+        currentSong: nullSong
+};
 
 config = JSON.parse(fs.readFileSync('./userdata/config.json', 'utf8'));
 
-volume = config.user_preferences.volume;
+global.volume = config.user_preferences.volume;
 
 const client = mpd.connect({
     port: config.mpd.port,
@@ -54,6 +61,7 @@ APP CALLS
 */
 
 app.whenReady().then(() => {
+    console.log('launching window')
     createWindow();
     
     app.on('activate', function () {
@@ -71,9 +79,18 @@ app.on('window-all-closed', function () {
 IPC EVENT LISTENERS 
 */
 
-ipcMain.on('getDefaultData', (event)=>{
-    event.sender.send('defaultDataRecieved', {volume});
+ipcMain.on('getVolume', (e)=>{
+    e.sender.send('volume', {volume});
 });
+
+/*ipcMain.on('eae', ()=>{
+    mainWindow.webContents.send('salve', 'salve');
+})*/
+
+ipcMain.on('getInitialData', (e)=>{ //on, not once, in case of a re-render
+    console.log('sending player data');
+    e.sender.send('initialData', playerData);
+})
   
 ipcMain.on('load-list', (event, songs) => {
     console.log(songs)
@@ -86,73 +103,86 @@ ipcMain.on('load-list', (event, songs) => {
 });
   
 ipcMain.on('playback', (event)=>{
-    if(stopped){
-      stopped = false;
-      isPlaying = true;
-      return client.sendCommand(mpd.cmd(`play`, []), function(err, msg) {
-        if (err) throw err;
-        console.log(msg);
-      });
+    if(playerData.stopped){
+        //TODO: ADICIONAR VEFICIAÇÃO DE QUEUE AQUI
+        playerData.stopped = false;
+        playerData.isPlaying = true;
+        event.sender.send('update-player', playerData);
+        return client.sendCommand(mpd.cmd(`play`, []), function(err, msg) {
+            if (err) throw err;
+            console.log(msg);
+        });
     }
   
     let p = "0";
-    if(isPlaying){
+    if(playerData.isPlaying){
         p = "1";
-        isPlaying = false;
-    }else if(!isPlaying){
-        isPlaying = true;
+        playerData.isPlaying = false;
+    }else if(!playerData.isPlaying){
+        playerData.isPlaying = true;
     }
   
     client.sendCommand(mpd.cmd(`pause ${p}`, []), function(err, msg) {
       if (err) throw err;
       console.log(msg);
     });
+
+    event.sender.send('update-player', playerData);
 });
   
 ipcMain.on('setvol', (event, val)=>{
-    volume = val;
+    global.volume = val;
     client.sendCommand(mpd.cmd(`setvol ${val}`, []));
 });
+
+function updateSongInfo(send){ //TODO: probably won't be needed in the future
+    client.sendCommand(mpd.cmd('currentsong', []), function(err, songInfo){
+        let s = formatStatus(songInfo);
+        playerData.currentSong.title = s["Title"];
+        playerData.currentSong.albumArtist = s["AlbumArtist"];
+        if(send) mainWindow.webContents.send('update-player', playerData);
+    });
+}
   
 client.on('ready', function() {
     console.log("ready");
   
-    client.sendCommand(mpd.cmd(`setvol ${volume}`, []));
+    client.sendCommand(mpd.cmd(`setvol ${global.volume}`, []));
     
     client.sendCommand(mpd.cmd("status", []), function(err, msg) {
       if (err) throw err;
       let obj = formatStatus(msg);
   
       console.log(obj);
-  
-      if(obj["state"] == "stop"){
-        stopped = true;
-      }
-      else{
-        stopped = false;
-        currentSong = obj["song"];
+
+    if(obj["state"] !== "stop"){
+        playerData.stopped = false;
+        playerData.currentSong.id = obj["songid"];
+        updateSongInfo();
         let b = obj["state"] == "play";
-        isPlaying = b;
+        playerData.isPlaying = b;
       }
     });
 });
   
 client.on('system-player', function() {
     client.sendCommand(mpd.cmd("status", []), function(err, msg) {
-      if (err) throw err;
-      let obj = formatStatus(msg);
+        if (err) throw err;
+        let obj = formatStatus(msg);
+    
+        console.log(obj);
   
-      console.log(obj);
-  
-      if(obj["state"] == "stop"){
-        stopped = true;
-      }
-      else if(obj["state"] == "play" && obj["song"] !== currentSong){
-        console.log("mudou a musica!")
-  
-        client.sendCommand(mpd.cmd('currentsong', []), function(err, msg){
-          console.log(msg);
-        });
-      }
+        if(obj["state"] == "stop"){
+            playerData.stopped = true;
+            playerData.isPlaying = false;
+            updateSongInfo(true)
+        }
+        else if(obj["state"] == "play" && obj["songid"] !== playerData.currentSong.id){
+            console.log("mudou a musica!")
+    
+            playerData.currentSong.id = obj["songid"];
+
+            updateSongInfo(true)
+        }
     });
 });

@@ -13,13 +13,13 @@ function toMSS(seconds){
     return `${m}:${s}`;
 }
 
-function ProgressBar({duration}){
+function ProgressBar({disabled, duration}){
     const [current, setCurrentTime] = useState(0);
 
     return(
         <div className="progressbar-container">
             <span>{ toMSS(current) }</span>
-            <Slider className="progressbar" min={0} max={Number(duration)} value={current} onChange={setCurrentTime} step={1} />
+            <Slider disabled={disabled} className="progressbar" min={0} max={Number(duration)} value={current} onChange={setCurrentTime} step={1} />
             <span>{ toMSS(duration) }</span>
         </div>
     );

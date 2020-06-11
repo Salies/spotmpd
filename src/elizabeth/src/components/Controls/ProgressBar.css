@@ -5,7 +5,7 @@
 }
 
 .progressbar{
-  width: 64%!important;
+  width: calc(100% - 18px)!important;
   padding: 8px 9px!important;
 }
 

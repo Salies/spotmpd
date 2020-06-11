@@ -2,4 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const { ipcRenderer } = window.require('electron');
+
+ipcRenderer.send('getInitialData');
+
+ipcRenderer.once('initialData', (event, arg)=>{
+  ReactDOM.render(<App initialData={arg} />, document.getElementById('root'))
+});

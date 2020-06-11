@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&display=swap');
+
 :root{
     --base-00: #222223;
     --base-01: #555968;
@@ -7,6 +9,7 @@
 }
 
 body{
+    font-family: 'Open Sans', sans-serif;
     margin:0;
     background-color:var(--base-00);
 }
@@ -24,7 +27,6 @@ body{
 }
 
 .controls{
-    display:flex;
     color:var(--base-3);
     height:90px;
     position:relative;
@@ -49,6 +51,8 @@ input[type="range"]{
     width:107px;
     height:20px;
     margin-right:40px;
+    float: right;
+    margin-top:35px;
     /*position:absolute;
     right:40px;
     top:50%;
@@ -67,17 +71,18 @@ input[type="range"]{
 
 .progressbar-container{
     width:100%;
+    margin-top:5px;
     text-align:center;
-    
 }
 
 .progressbar{
     display: inline-block;
 }
 
-.progressbar-container span{
-    display: block;
-    width:calc(18% - 18px);
+.progressbar-container span{ /* works perfectly, but currently disabled for layout reasons */
+    /*display: block;*/
+    display:none;
+    width:calc(20% - 18px);
 }
 
 .progressbar-container span:first-of-type{
@@ -95,18 +100,61 @@ input[type="range"]{
 }
 
 .now-playing{
+    position: relative;
+    width: calc(28% - 20px);
+    padding-right:20px;
+    height: 90px;
+    float: left;
+    overflow: hidden;
+}
+
+.now-playing-cover{
     width:90px;
     height:90px;
     background-color: #242526;
+    float:left;
+}
+
+.now-playing span{
+    display: block;
+    width: calc(100% - 104px);
+    padding-left:14px;
+    height: 20px;
+    float: left;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.now-playing-song{
+    font-size:14px;
+}
+
+.now-playing-artist{
+    font-size:12px;
 }
 
 .middle-controls{
-    width: calc(100% - 317px);
+    width: 44%;
+    height: 66px;
+    margin-top:15px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    float: left;
 }
 
 .player-buttons{
-    margin:0 auto;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    height:40px;
+}
+
+.player-buttons svg{
+    margin:0 10px;
+}
+
+.song-strings{
+    height: 40px;
+    margin-top: 25px;
 }
