@@ -81,6 +81,7 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', function () {
     if (process.platform !== 'darwin'){
+        timer.pause();
         app.quit();
     }
 });
@@ -115,6 +116,7 @@ ipcMain.on('load-list', (event, songs) => {
 ipcMain.on('playback', (event)=>{
     if(playerData.stopped){
         //TODO: ADICIONAR VEFICIAÇÃO DE QUEUE AQUI
+        timer.restart();
         playerData.stopped = false;
         playerData.isPlaying = true;
         event.sender.send('update-player', playerData);
@@ -126,9 +128,11 @@ ipcMain.on('playback', (event)=>{
   
     let p = "0";
     if(playerData.isPlaying){
+        timer.pause();
         p = "1";
         playerData.isPlaying = false;
     }else if(!playerData.isPlaying){
+        timer.resume();
         playerData.isPlaying = true;
     }
   
