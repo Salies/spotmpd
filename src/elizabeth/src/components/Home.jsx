@@ -12,6 +12,10 @@ function Home(){
     return(
         <div>
             <button onClick={()=> ipcRenderer.send('load-list', songs)}>Load Songs</button>
+            <button onClick={()=> ipcRenderer.send('start-timer')}>Start Timer</button>
+            <button onClick={()=> ipcRenderer.send('resume-timer')}>Resume Timer</button>
+            <button onClick={()=> ipcRenderer.send('pause-timer')}>Pause Timer</button>
+            <button onClick={()=> ipcRenderer.send('restart-timer')}>Restart Timer</button>
         </div>
     );
 }

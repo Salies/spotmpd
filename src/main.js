@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron'), mpd = require('@salies/mpd.js'), fs = require('fs');
+const { app, BrowserWindow, ipcMain } = require('electron'), mpd = require('@salies/mpd.js'), fs = require('fs'), Timer = require('./utils/Timer');
 
 /*
 FUNCTIONSS
@@ -38,14 +38,16 @@ GLOBAL (SCOPED TO MAIN) VARIABLES
 const nullSong = {
     title:null,
     albumArtist:null,
-    id:null
+    id:null,
+    duration:0
 };
 
-let config, playerData = {
+let config, 
+    playerData = {
         isPlaying: false, 
-        stopped: true,
-        currentSong: nullSong
-};
+        stopped: true
+    },
+    currentSong = nullSong;
 
 config = JSON.parse(fs.readFileSync('./userdata/config.json', 'utf8'));
 
@@ -55,6 +57,14 @@ const client = mpd.connect({
     port: config.mpd.port,
     host: config.mpd.url,
 });
+
+let timer = new Timer(function () { //treat it as a sync function?
+    client.sendCommand(mpd.cmd("status", []), function(err, msg) {
+        if (err) throw err;
+        let e = formatStatus(msg);
+        mainWindow.webContents.send('update-time', e["elapsed"]);
+    });
+}, 250)
 
 /* 
 APP CALLS
@@ -89,7 +99,7 @@ ipcMain.on('getVolume', (e)=>{
 
 ipcMain.on('getInitialData', (e)=>{ //on, not once, in case of a re-render
     console.log('sending player data');
-    e.sender.send('initialData', playerData);
+    e.sender.send('initialData', {playerData, currentSong});
 })
   
 ipcMain.on('load-list', (event, songs) => {
@@ -144,21 +154,25 @@ client.on('ready', function() {
       if (err) throw err;
       let obj = formatStatus(msg);
   
+      currentSong.duration = obj["duration"];
+
       console.log(obj);
 
-    if(obj["state"] !== "stop"){
-        playerData.stopped = false;
-        playerData.currentSong.id = obj["songid"];
-        client.sendCommand(mpd.cmd('currentsong', []), function(err, songInfo){
-            let s = formatStatus(songInfo);
-            playerData.currentSong.title = s["Title"];
-            playerData.currentSong.albumArtist = s["AlbumArtist"];
-            let b = obj["state"] == "play";
-            playerData.isPlaying = b;
-            mainWindow.webContents.send('update-player', playerData);
-        });
-        /*let b = obj["state"] == "play";
-        playerData.isPlaying = b;*/
+        if(obj["state"] !== "stop"){
+            timer.start();
+            playerData.stopped = false;
+            currentSong.id = obj["songid"];
+            client.sendCommand(mpd.cmd('currentsong', []), function(err, songInfo){
+                let s = formatStatus(songInfo);
+                currentSong.title = s["Title"];
+                currentSong.albumArtist = s["AlbumArtist"];
+                let b = obj["state"] == "play";
+                playerData.isPlaying = b;
+                mainWindow.webContents.send('update-player', playerData);
+                mainWindow.webContents.send('update-song', currentSong);
+            });
+            /*let b = obj["state"] == "play";
+            playerData.isPlaying = b;*/
       }
     });
 });
@@ -167,26 +181,49 @@ client.on('system-player', function() {
     client.sendCommand(mpd.cmd("status", []), function(err, msg) {
         if (err) throw err;
         let obj = formatStatus(msg);
-    
+
         console.log(obj);
+
+        currentSong.duration = obj["duration"];
   
         if(obj["state"] == "stop"){
+            timer.restart();
             playerData.stopped = true;
             playerData.isPlaying = false;
-            playerData.currentSong = nullSong;
+            currentSong = nullSong;
             mainWindow.webContents.send('update-player', playerData);
+            mainWindow.webContents.send('update-song', currentSong);
         }
-        else if(obj["state"] == "play" && obj["songid"] !== playerData.currentSong.id){
+        else if(obj["state"] == "play" && obj["songid"] !== currentSong.id){
             console.log("mudou a musica!")
+
+            timer.restart();
     
-            playerData.currentSong.id = obj["songid"];
+            currentSong.id = obj["songid"];
 
             client.sendCommand(mpd.cmd('currentsong', []), function(err, songInfo){
                 let s = formatStatus(songInfo);
-                playerData.currentSong.title = s["Title"];
-                playerData.currentSong.albumArtist = s["AlbumArtist"];
+                currentSong.title = s["Title"];
+                currentSong.albumArtist = s["AlbumArtist"];
                 mainWindow.webContents.send('update-player', playerData);
+                mainWindow.webContents.send('update-song', currentSong);
             });
         }
     });
 });
+
+ipcMain.on('pause-timer', ()=>{
+    timer.pause();
+})
+
+ipcMain.on('resume-timer', ()=>{
+    timer.resume();
+})
+
+ipcMain.on('start-timer', ()=>{
+    timer.start();
+})
+
+ipcMain.on('restart-timer', ()=>{
+    timer.restart();
+})

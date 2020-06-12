@@ -10,17 +10,25 @@ function callIpc(call){
 }
 
 function Controls({initial}){
-    const [playerData, setPlayerData] = useState(initial);
+    const [playerData, setPlayerData] = useState(initial.playerData);
+    const [songData, setSongData] = useState(initial.currentSong);
 
     useEffect(() => {
-        function handleDataChange(event, data) {
+        function handlePlayerDataChange(event, data) {
           setPlayerData(data);
         }
 
-        ipcRenderer.on('update-player', handleDataChange);
+        function handleSongDataChange(event, data){
+            console.log(data);
+            setSongData(data);
+        }
+
+        ipcRenderer.on('update-player', handlePlayerDataChange);
+        ipcRenderer.on('update-song', handleSongDataChange);
 
         return () => {
-            ipcRenderer.removeListener('update-player', handleDataChange);
+            ipcRenderer.removeListener('update-player', handlePlayerDataChange);
+            ipcRenderer.removeListener('update-song', handleSongDataChange);
         };
     });
 
@@ -28,10 +36,10 @@ function Controls({initial}){
 
     return(
         <div>
-            <NowPlaying song={playerData.currentSong.title} artist={playerData.currentSong.albumArtist}/>
+            <NowPlaying song={songData.title} artist={songData.albumArtist}/>
             <div className="middle-controls">
                 <Buttons callback={callIpc} playing={playerData.isPlaying}/>
-                <ProgressBar duration="195" disabled={playerData.stopped} />
+                <ProgressBar duration={songData.duration} disabled={playerData.stopped} />
             </div>
         </div>
     );

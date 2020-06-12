@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Slider } from "@reach/slider";
 import './ProgressBar.css';
+
+const { ipcRenderer } = window.require('electron');
 
 function toMSS(seconds){
     let m = Math.floor(seconds / 60),
@@ -16,10 +18,22 @@ function toMSS(seconds){
 function ProgressBar({disabled, duration}){
     const [current, setCurrentTime] = useState(0);
 
+    useEffect(() => {
+        function handle(event, elapsed) {
+            setCurrentTime(elapsed);
+        }
+
+        ipcRenderer.on('update-time', handle);
+
+        return () => {
+            ipcRenderer.removeListener('update-time', handle);
+        };
+    });
+
     return(
         <div className="progressbar-container">
             <span>{ toMSS(current) }</span>
-            <Slider disabled={disabled} className="progressbar" min={0} max={Number(duration)} value={current} onChange={setCurrentTime} step={1} />
+            <Slider disabled={disabled} className="progressbar" min={0} max={Number(duration)} value={Number(current)} step={1} />
             <span>{ toMSS(duration) }</span>
         </div>
     );
