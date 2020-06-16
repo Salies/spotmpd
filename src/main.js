@@ -11,7 +11,8 @@ function createWindow(){
         height:710,
         useContentSize: true,
         webPreferences:{
-            nodeIntegration:true
+            nodeIntegration:true,
+            enableRemoteModule: true
         }
     });
 
@@ -148,6 +149,34 @@ ipcMain.on('setvol', (event, val)=>{
     global.volume = val;
     client.sendCommand(mpd.cmd(`setvol ${val}`, []));
 });
+
+ipcMain.on('next', ()=>{
+    mainWindow.webContents.send('update-time', 0);
+    client.sendCommand(mpd.cmd('next', []));
+});
+
+ipcMain.on('previous', ()=>{
+    mainWindow.webContents.send('update-time', 0);
+    client.sendCommand(mpd.cmd('previous', []));
+})
+
+ipcMain.on('repeat', (event, val)=>{
+    console.log('chamou repeat ' + val)
+    let r = "1";
+    if(val == 0){
+        r = "0";
+        client.sendCommand(mpd.cmd('single 0', []));
+    }else if(val == 2){
+        client.sendCommand(mpd.cmd('single 1', []));
+    }
+
+    client.sendCommand(mpd.cmd(`repeat ${r}`, []));
+})
+
+ipcMain.on('shuffle', (event, val)=>{
+    console.log('chamou shuffle ' + val)
+    client.sendCommand(mpd.cmd(`random ${val}`, []));
+})
   
 client.on('ready', function() {
     console.log("ready");
@@ -157,6 +186,11 @@ client.on('ready', function() {
     client.sendCommand(mpd.cmd("status", []), function(err, msg) {
       if (err) throw err;
       let obj = formatStatus(msg);
+
+      if(obj["repeat"] != 0){
+            console.log('repeat não é 0, setando...')
+            client.sendCommand(mpd.cmd(`repeat 0`, []));
+      }
   
       currentSong.duration = obj["duration"];
 
@@ -174,6 +208,9 @@ client.on('ready', function() {
                 playerData.isPlaying = b;
                 mainWindow.webContents.send('update-player', playerData);
                 mainWindow.webContents.send('update-song', currentSong);
+                if(obj["state"] == "pause"){
+                    mainWindow.webContents.send('update-time', obj["elapsed"]);
+                }
             });
             /*let b = obj["state"] == "play";
             playerData.isPlaying = b;*/
@@ -196,7 +233,7 @@ client.on('system-player', function() {
             playerData.isPlaying = false;
             currentSong = nullSong;
             mainWindow.webContents.send('update-player', playerData);
-            mainWindow.webContents.send('update-song', currentSong);
+            mainWindow.webContents.send('update-song', currentSong); //TODO (ISSUE) - NOT REALLY ERASING DATA, SEE WHY
         }
         else if(obj["state"] == "play" && obj["songid"] !== currentSong.id){
             console.log("mudou a musica!")
@@ -215,19 +252,3 @@ client.on('system-player', function() {
         }
     });
 });
-
-ipcMain.on('pause-timer', ()=>{
-    timer.pause();
-})
-
-ipcMain.on('resume-timer', ()=>{
-    timer.resume();
-})
-
-ipcMain.on('start-timer', ()=>{
-    timer.start();
-})
-
-ipcMain.on('restart-timer', ()=>{
-    timer.restart();
-})

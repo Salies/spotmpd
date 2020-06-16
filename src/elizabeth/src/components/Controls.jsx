@@ -5,8 +5,8 @@ import NowPlaying from './Controls/NowPlaying';
 
 const { ipcRenderer } = window.require('electron');
 
-function callIpc(call){
-    ipcRenderer.send(call);
+function callIpc(call, val){
+    ipcRenderer.send(call, val);
 }
 
 function Controls({initial}){

@@ -154,7 +154,27 @@ input[type="range"]{
     margin:0 10px;
 }
 
+.repeat{
+    position:relative;
+    display:flex;
+}
+
 .song-strings{
     height: 40px;
     margin-top: 25px;
+}
+
+.repeat-one{
+    position: absolute;
+    width: 12px;
+    height: 2px;
+    background: var(--pink);
+    right: 5px;
+    bottom: -5px;
+    border-radius: 50%;
+    color: var(--base-03);
+    font-size: 8px;
+    text-align: center;
+    font-weight: 600;
+    padding-bottom: 10px;
 }
